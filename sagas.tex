@@ -9,9 +9,31 @@
 \newtheorem{corollary}{Corollary}[section]
 \newtheorem{lemma}{Lemma}[section]
 
+\author{
+  McCaffrey, Caitie\\
+  \texttt{Sporty Tights, Inc}
+  \and
+  Kingsbury, Kyle\\
+  \texttt{The SF Eagle}
+  \and
+  Narula, Neha\\
+  \texttt{That's DOCTOR Narula to you!}
+}
+
+\title{Distributed Sagas}
+
 \begin{document}
 
+\maketitle
+
 \section{Introduction}
+
+The saga paper outlines a technique for long-lived transactions which provide
+atomicity and durability without isolation (what about consistency? Preserved
+outside saga scope, not within, right?). In this work, we generalize sagas to
+a distributed system, where processes communicate via an asynchronous network,
+and discover new constraints on saga sub-transactions.
+
 
 \section{The Saga Execution Coordinator}
 
