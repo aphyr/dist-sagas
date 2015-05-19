@@ -141,20 +141,35 @@ where $0 \le j \le n$.
 
 \begin{proof}
 
-Let the $i^{th}$ transaction seen be $T_j$. We wish to show $i = j$.
+Consider a sequential history $S = (T_0, ..., T_i)$ followed by $T_j$. Is $(T_0,
+... T_i, T_j)$ sequential? We must show $i + 1 = j$.
 
-How many transactions appear prior to $T_j$? By \ref{t_contiguous}, at least
-$j$ transactions ($T_0, \ldots T_{j-1}$) must have already executed prior to
-$T_j$. This implies $j <= i$.
+\begin{description}
+  \item[Case 1] Assume $j <= i$. Then $T_j$ is a duplicate of some transaction
+already in $S$, which violates \ref{t_at_most_once}: a contradiction.
+  \item[Case 2] Assume $i + 1 < j$. By \ref{t_contiguous}, $T_{i + 1}$ must
+appear before $T_j$---but $S$ cannot contain $T_{i+1}$, since it only ranges
+from $0$ to $T_i$.
+  \item[Case 3] Assume $i < j <= i + 1$. Then $i + 1 = j$.
+\end{description}
 
-Assume $j < i$. Then there must be some transaction $T_k$, prior to $T_j$, in
-addition to the minimum required $T_0, \ldots, T_{j-1}$. \ref{t_at_most_once}
-rules out $T_k$ being a duplicate of any other transaction, so $j < k$.
-However, this implies $T_k$ appears with fewer than $i$ transactions before it.
+Since cases 1 and 2 are impossible, \textit{any} history comprised of a
+transaction following a sequential history of at least one element must be
+sequential as well.
 
+Now, consider histories of one element or fewer:
+
+\begin{description}
+  \item[Case 1] No transactions occur. The history is trivially sequential.
+  \item[Case 2] Exactly one transaction occurs. By \ref{t_zero_first}, that
+transaction must be $T_0$. This history is trivially sequential.
+\end{description}
+
+So any history of one element or fewer is sequential, and any transaction
+\textit{appended} to that history will also form a sequential history, and so
+on. By induction, all transactions in a rollback saga system occur
+sequentially.
 
 \end{proof}
-
-
 
 \end{document}
