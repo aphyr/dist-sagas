@@ -6,9 +6,11 @@
 
 \DeclareGraphicsExtensions{.pdf,.ps,.png,.jpg}
 
+\newcounter{results}
+
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{corollary}{Corollary}[section]
-\newtheorem{lemma}{Lemma}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}{Corollary}[theorem]
 
 \author{
   McCaffrey, Caitie\\
@@ -51,6 +53,9 @@ transactions proceed sequentially.
 
 \includegraphics[width=\linewidth]{flow}
 
+
+
+
 \section{Both Rollback and Roll-forward}
 
 \begin{lemma}[]
@@ -83,6 +88,7 @@ $T_0, T_1, ... T_{i-1}$ have been acknowledged.
 
 \end{proof}
 
+
 \begin{corollary}
 \label{t_zero_first}
 The first transaction to be received and acknowledged is $T_0$.
@@ -90,10 +96,12 @@ The first transaction to be received and acknowledged is $T_0$.
 
 \begin{proof}
 Assume the first transaction to be processed is not $T_0$, but rather, some
-$T_i \mid 0 < i \le n$. By lemma \ref{t_contiguous}, $T_{i-1}$ must have been
+$T_i \mid 0 < i \le n$. By \ref{t_contiguous}, $T_{i-1}$ must have been
 received and acknowledged by a TEC already. $T_i$ is therefore \textit{not} the
 first transaction: a contradiction.
 \end{proof}
+
+
 
 \section{Rollback}
 
@@ -121,16 +129,32 @@ request.
 
 Because the network does not duplicate requests, the number of times $T_i$ can
 arrive at a TEC is less than or equal to the number of requests any SEC makes
-for $T_i$. Since that number is at most one, $T_i$ is also received at most
-once.
+for $T_i$. Since that number is at most one, $T_i$ is received at most once.
 \end{proof}
 
-\begin{corollary}
-\label{t_strict_order}
-Transactions are seen by TECs in strictly ascending order.
-\end{corollary}
+
+\begin{lemma}
+\label{t_sequential}
+Transactions are seen by TECs in sequential order: $T_0, T_1, \ldots, T_j$,
+where $0 \le j \le n$.
+\end{lemma}
 
 \begin{proof}
+
+Let the $i^{th}$ transaction seen be $T_j$. We wish to show $i = j$.
+
+How many transactions appear prior to $T_j$? By \ref{t_contiguous}, at least
+$j$ transactions ($T_0, \ldots T_{j-1}$) must have already executed prior to
+$T_j$. This implies $j <= i$.
+
+Assume $j < i$. Then there must be some transaction $T_k$, prior to $T_j$, in
+addition to the minimum required $T_0, \ldots, T_{j-1}$. \ref{t_at_most_once}
+rules out $T_k$ being a duplicate of any other transaction, so $j < k$.
+However, this implies $T_k$ appears with fewer than $i$ transactions before it.
+
+
 \end{proof}
+
+
 
 \end{document}
