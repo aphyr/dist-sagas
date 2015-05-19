@@ -1,0 +1,91 @@
+digraph {
+  start[shape="box", label="Start"];
+
+  saga_start_log[shape="parallelogram", label="Log saga start"];
+  saga_start[shape="box", label="Saga start"];
+
+  t_init_i[shape="box", label="Let i = 0"];
+  t_inc_i[shape="box", label="i++"];
+
+  t_start_log[shape="parallelogram", label=<Log T<sub>i</sub> start>];
+  t_req[shape="box", label=<Request T<sub>i</sub>>];
+  t_if_res[shape="diamond", label=<Await T<sub>i</sub>>];
+  t_done_log[shape="parallelogram", label=<Log T<sub>i</sub> done>];
+  t_if_more[shape="diamond", label="i = n?"];
+
+  saga_abort_log[shape="parallelogram", label="Log saga abort"];
+  saga_abort[shape="box", label="Saga abort"];
+
+  c_init_i[shape="box", label="Let i = last logged value of i"];
+  c_dec_i[shape="box", label="i--"];
+
+  c_start_log[shape="parallelogram", label=<Log C<sub>i</sub> start>];
+  c_req[shape="box", label=<Request C<sub>i</sub>>];
+  c_if_res[shape="diamond", label=<Await C<sub>i</sub>>];
+  c_done_log[shape="parallelogram", label=<Log C<sub>i</sub> done>];
+  c_if_more[shape="diamond", label="i = 0?"];
+
+  saga_done_log[shape="parallelogram", label="Log saga done"];
+  saga_done[shape="box", label="Saga done"];
+
+  // Start
+  start -> saga_abort_log[label="incomplete saga"];
+  start -> saga_abort[label="aborted saga"];
+  start -> saga_start_log[label="clean"];
+
+  // Saga start
+  saga_start_log -> saga_start;
+  saga_start -> t_init_i;
+  t_init_i -> t_start_log;
+
+  // Transaction attempt
+  t_start_log -> t_req;
+  t_req -> t_if_res;
+
+  // Successful txn
+  t_if_res -> t_done_log[label="ok"];
+  t_done_log -> t_if_more;
+
+  // Saga completion
+  t_if_more -> saga_done_log[label="done"];
+
+  // More txns?
+  t_if_more -> t_inc_i[label="more"];
+  t_inc_i -> t_start_log;
+
+  // Failed txn
+  t_if_res -> saga_abort_log[label="error"];
+
+  // Abort
+  saga_abort_log -> saga_abort;
+  saga_abort -> c_init_i;
+  c_init_i -> c_start_log;
+
+  // Compensate attempt
+  c_start_log -> c_req;
+  c_req -> c_if_res;
+
+  // Compensate failure
+  c_if_res -> c_req[label="error"];
+
+  // Compensate success
+  c_if_res -> c_done_log[label="ok"];
+  c_done_log -> c_if_more;
+
+  // Rollback complete
+  c_if_more -> saga_done_log[label="done"];
+
+  // More compensations
+  c_if_more -> c_dec_i[label="more"];
+  c_dec_i -> c_start_log;
+
+  saga_done_log -> saga_done;
+  saga_done -> start; 
+
+  {rank=same; t_inc_i t_start_log}
+  {rank=same; c_dec_i c_start_log}
+  {rank=same; t_if_more c_if_more}
+  {rank=same; saga_start_log saga_abort_log}
+  {rank=same; t_start_log c_start_log}
+  {rank=same; saga_start saga_abort}
+}
