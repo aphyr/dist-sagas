@@ -95,10 +95,33 @@ The first transaction to be received and acknowledged is $T_0$.
 \end{corollary}
 
 \begin{proof}
+
 Assume the first transaction to be processed is not $T_0$, but rather, some
 $T_i \mid 0 < i \le n$. By \ref{t_contiguous}, $T_{i-1}$ must have been
 received and acknowledged by a TEC already. $T_i$ is therefore \textit{not} the
 first transaction: a contradiction.
+
+\end{proof}
+
+
+\begin{lemma}
+\label{c_upper}
+If $C_i$ is received by a TEC, then $T_{i - 1}$ must have been acknowledged by
+some TEC, where $0 < i \le n$.
+\end{lemma}
+
+\begin{proof}
+
+Receipt of $C_i$ by a TEC implies the request of $C_i$ by some SEC. An SEC can
+only request $C_i$ if it logs its intent to start $C_i$, which can occur by two
+paths: either the completion of $C_{i+1}$, or by the initialization of $i$ to
+its last logged value. Both branches imply the SEC read $i$, or some higher
+value, from storage.
+
+$i$ is only incremented by an SEC which has successfully completed $T_{i-1}$.
+Since $i$ is nonzero, it was incremented, and $T_{i-1}$ was acknowledged by
+some TEC.
+
 \end{proof}
 
 
@@ -111,6 +134,7 @@ Transactions are requested and received at most once.
 \end{lemma}
 
 \begin{proof}
+
 In order for an SEC to request a transaction $T_i$, it has to record its intent
 to execute $T_i$ in shared SEC storage. Since that storage is linearizable, any
 other SEC recording an intent to execute $T_i$ would be visible to the
@@ -130,6 +154,7 @@ request.
 Because the network does not duplicate requests, the number of times $T_i$ can
 arrive at a TEC is less than or equal to the number of requests any SEC makes
 for $T_i$. Since that number is at most one, $T_i$ is received at most once.
+
 \end{proof}
 
 
@@ -145,12 +170,12 @@ Consider a sequential history $S = (T_0, ..., T_i)$ followed by $T_j$. Is $(T_0,
 ... T_i, T_j)$ sequential? We must show $i + 1 = j$.
 
 \begin{description}
-  \item[Case 1] Assume $j <= i$. Then $T_j$ is a duplicate of some transaction
+  \item[Case 1] Assume $j \le i$. Then $T_j$ is a duplicate of some transaction
 already in $S$, which violates \ref{t_at_most_once}: a contradiction.
   \item[Case 2] Assume $i + 1 < j$. By \ref{t_contiguous}, $T_{i + 1}$ must
 appear before $T_j$---but $S$ cannot contain $T_{i+1}$, since it only ranges
 from $0$ to $T_i$.
-  \item[Case 3] Assume $i < j <= i + 1$. Then $i + 1 = j$.
+  \item[Case 3] Assume $i < j \le i + 1$. Then $i + 1 = j$.
 \end{description}
 
 Since cases 1 and 2 are impossible, \textit{any} history comprised of a
