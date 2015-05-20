@@ -126,6 +126,24 @@ some TEC.
 
 
 \begin{lemma}
+\label{c_maybe_t}
+If $C_i$ is requested, $T_i$ may or may not have been requested.
+\end{lemma}
+
+\begin{proof}
+
+We know from \ref{c_prior_ts} that $C_i$ implies the acknowledgement of all
+$T_j$ where $0 \le j < i$. But what of that final transaction, $T_i$? Can we
+guarantee its completion?
+
+The answer is no. All that is necessary for $C_i$ to occur is for an SEC to
+write $T_i$'s start. If the SEC crashes just after journaling, it will never
+request $T_i$. If it does not crash, $T_i$ will be requested.
+
+\end{proof}
+
+
+\begin{lemma}
 \label{max_c_later_ts}
 If $C_i$ is the highest compensating transaction requested, no $T_j$ will ever
 have been requested, for all $i < j$.
@@ -149,24 +167,6 @@ requested, for all $i + 1 < j$.
 Assume some $C_j$ \textit{is} eventually requested. Then some SEC must have written $j$ to disk, which implies $T_{j-1}$ was acknowledged. Since $T_{j-1}$ was requested, and $i < j - 1$, $T_i$ cannot have been the highest transaction requested: a contradiction.
 
 \end{proof}
-
-\begin{lemma}
-\label{c_maybe_t}
-If $C_i$ is requested, $T_i$ may or may not have been requested.
-\end{lemma}
-
-\begin{proof}
-
-We know from \ref{c_prior_ts} that $C_i$ implies the acknowledgement of all
-$T_j$ where $0 \le j < i$. But what of that final transaction, $T_i$? Can we
-guarantee its completion?
-
-The answer is no. All that is necessary for $C_i$ to occur is for an SEC to
-write $T_i$'s start. If the SEC crashes just after journaling, it will never
-request $T_i$. If it does not crash, $T_i$ will be requested.
-
-\end{proof}
-
 
 \section{Rollback}
 
