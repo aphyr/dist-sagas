@@ -157,7 +157,7 @@ have written $j$ to storage prior to that request. In order to reach $C_i$, an S
 \end{proof}
 
 \begin{lemma}
-\label{max_c_later_cs}
+\label{max_t_later_cs}
 If $T_i$ is the highest transaction requested, no $C_j$ will ever have been
 requested, for all $i + 1 < j$.
 \end{lemma}
@@ -167,6 +167,51 @@ requested, for all $i + 1 < j$.
 Assume some $C_j$ \textit{is} eventually requested. Then some SEC must have written $j$ to disk, which implies $T_{j-1}$ was acknowledged. Since $T_{j-1}$ was requested, and $i < j - 1$, $T_i$ cannot have been the highest transaction requested: a contradiction.
 
 \end{proof}
+
+
+\begin{lemma}
+\label{success_all_ts}
+If a saga completes successfully, every transaction $T_i$ will have been
+acknowledged at least once, for $0 \le i \le n$.
+\end{lemma}
+
+\begin{proof}
+
+A saga can complete successfully iff the highest transaction $T_n$ has been
+acknowledged. By \ref{t_contiguous}, every $T_i$ must \textit{also} have
+completed, where $0 \le i < n$.
+
+\end{proof}
+
+
+\begin{lemma}
+\label{abort_corresponding_cs}
+If a saga completes the abort process, and $T_i$ was received by a TEC, $C_i$
+was also acknowledged by a TEC.
+\end{lemma}
+
+\begin{proof}
+
+Let $C_{m}$ be the highest compensating transaction acknowledged. Assume $C_i$
+was not received: $m < i$. By \ref{max_c_later_ts}, no transaction $T_i$ with
+$m < i$ can ever occur, so $i \le m$---which contradicts $m < i$. $C_i$ must
+have been acknowledged.
+
+\end{proof}
+
+
+\begin{theorem}
+\label{all_ts_or_corresponding_cs}
+Once a saga is complete, either every transaction $T_i$ will have been acknowledged at least once; or, for every transaction $T_i$ received by a TEC, $C_i$ is also acknowledged by a TEC.
+\end{theorem}
+
+\begin{proof}
+
+Sagas may only complete by successful termination or by being aborted. If
+successful, \ref{success_all_ts} ensures every $T_i$ occurs. If the saga
+aborts, \ref{abort_corresponding_cs} ensures the receipt of $T_i$ implies the
+receipt of $C_i$.
+
 
 \section{Rollback}
 
